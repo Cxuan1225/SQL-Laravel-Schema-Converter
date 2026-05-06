@@ -1,0 +1,50 @@
+body {
+  background:
+    radial-gradient(circle at top left, rgba(99, 102, 241, 0.24), transparent 28rem),
+    radial-gradient(circle at top right, rgba(16, 185, 129, 0.14), transparent 26rem),
+    #020617;
+}
+
+#editorGrid.ux-view-input {
+  grid-template-columns: minmax(0, 1fr) !important;
+}
+
+#editorGrid.ux-view-output {
+  grid-template-columns: minmax(0, 1fr) !important;
+}
+
+#editorGrid.ux-view-input #outputPanel,
+#editorGrid.ux-view-output #inputPanel {
+  display: none !important;
+}
+
+.ux-scrollbar::-webkit-scrollbar,
+#sqlInput::-webkit-scrollbar,
+pre::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.ux-scrollbar::-webkit-scrollbar-thumb,
+#sqlInput::-webkit-scrollbar-thumb,
+pre::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.25);
+  border-radius: 999px;
+}
+
+.ux-scrollbar::-webkit-scrollbar-track,
+#sqlInput::-webkit-scrollbar-track,
+pre::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.ux-toast-show {
+  opacity: 1 !important;
+  transform: translateY(0) !important;
+}
+
+.ux-active-view {
+  background: rgba(99, 102, 241, 0.95) !important;
+  color: white !important;
+  border-color: rgba(129, 140, 248, 0.8) !important;
+}
