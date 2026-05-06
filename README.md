@@ -23,6 +23,35 @@ Open `sql_to_laravel_schema_creator.html` in a browser.
 
 No build step is required. The page loads Tailwind CSS from the CDN and uses the local files in `assets/`.
 
+## Installation
+
+Use npm for the standalone Node CLI:
+
+```bash
+npm install -g sql-laravel-schema-converter
+sql-laravel convert dump.sql generated.php --pk=laravel
+```
+
+Use Composer for the Laravel Artisan command:
+
+```bash
+composer require cxuan1225/sql-laravel-schema-converter
+php artisan schema:convert-sql dump.sql database/migrations --pk=laravel
+```
+
+If the packages have not been published to npm or Packagist yet, install from GitHub instead:
+
+```bash
+npm install -g github:Cxuan1225/SQL-Laravel-Schema-Converter
+```
+
+```bash
+composer config repositories.sql-laravel-schema-converter vcs https://github.com/Cxuan1225/SQL-Laravel-Schema-Converter.git
+composer require cxuan1225/sql-laravel-schema-converter:dev-master
+```
+
+Composer uses `composer require` to download a package into a Laravel project. `composer install` is only for installing dependencies from an existing `composer.lock`.
+
 ## API Usage
 
 Deploy the repository on Vercel and send JSON to:
@@ -185,9 +214,9 @@ This is a practical converter, not a full SQL parser or database engine. Always 
 
 The converter is designed to accelerate migration drafting while keeping final schema review in the developer's hands.
 
-## AI-Generated Notice
+## AI-Generated Content Notice
 
-This project was generated with assistance from AI. It may contain mistakes, incomplete behavior, misleading output, or misleading documentation. Users are responsible for reviewing and validating all generated code before use. The repository owner, contributors, referenced authors, and any other authors are not responsible or liable for errors, omissions, misleading content, or consequences arising from use of this project.
+This project was generated with assistance from AI tools. It may contain mistakes, incomplete behavior, security issues, or misleading documentation. Users are solely responsible for reviewing, testing, and validating all code before use, especially in production environments. The repository owner, contributors, and any referenced authors make no warranties and accept no liability for errors, omissions, or any consequences arising from the use of this project. This notice is supplementary to and does not modify the terms of the MIT License.
 
 ## License
 
