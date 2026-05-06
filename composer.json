@@ -1,0 +1,38 @@
+{
+  "name": "cxuan1225/sql-laravel-schema-converter",
+  "description": "Convert MySQL or MariaDB CREATE TABLE SQL into Laravel migration schema code.",
+  "type": "library",
+  "license": "MIT",
+  "autoload": {
+    "psr-4": {
+      "SqlLaravelSchemaConverter\\": "src/"
+    }
+  },
+  "archive": {
+    "exclude": [
+      "/.gitignore",
+      "/.package-check",
+      "/api",
+      "/assets",
+      "/bin",
+      "/package.json",
+      "/package-lock.json",
+      "/sql_to_laravel_schema_creator.html",
+      "/tests",
+      "/vercel.json",
+      "/src/converter.js"
+    ]
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "SqlLaravelSchemaConverter\\SqlLaravelSchemaConverterServiceProvider"
+      ]
+    }
+  },
+  "require": {
+    "php": "^8.2",
+    "illuminate/console": "^10.0|^11.0|^12.0",
+    "illuminate/support": "^10.0|^11.0|^12.0"
+  }
+}

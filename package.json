@@ -1,0 +1,19 @@
+{
+  "name": "sql-laravel-schema-converter",
+  "version": "1.0.0",
+  "description": "Convert MySQL or MariaDB CREATE TABLE SQL into Laravel migration schema code.",
+  "license": "MIT",
+  "main": "./src/converter.js",
+  "bin": {
+    "sql-laravel": "./bin/sql-laravel.js"
+  },
+  "files": [
+    "bin/sql-laravel.js",
+    "src/converter.js",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "test": "node --check src/converter.js && node --check bin/sql-laravel.js"
+  }
+}
