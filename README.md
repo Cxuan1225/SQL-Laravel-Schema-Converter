@@ -1,45 +1,101 @@
 # SQL Laravel Schema Converter
 
-A browser, API, CLI, and Laravel Artisan tool for converting MySQL or MariaDB `CREATE TABLE` statements into Laravel migration schema code.
+Convert MySQL or MariaDB `CREATE TABLE` statements into Laravel migration code.
 
-The browser app runs entirely in the client. The API and Node CLI share the same JavaScript converter core, and the Laravel Artisan command provides a PHP-native package entry point for Laravel applications.
+Use this when you have an existing SQL dump and want a faster starting point for Laravel migrations. The converter can run as an npm CLI, Laravel Artisan command, browser tool, or Vercel API. The npm and Composer package contents are kept separate so each installation gets only the files it needs.
 
-## Features
+## Quick Start
 
-- Convert one or more `CREATE TABLE` blocks into Laravel `Schema::create()` calls.
-- Optionally wrap generated schema code in an anonymous Laravel migration class.
-- Import `.sql` or `.txt` files, paste from the clipboard, copy output, and download the generated migration.
-- Detect tables, warnings, SQL size, foreign keys, and conversion status while editing.
-- Combine `created_at` and `updated_at` into `$table->timestamps()`.
-- Convert `deleted_at` into `$table->softDeletes()`.
-- Optionally convert actual foreign-key columns into `$table->foreignId()`.
-- Move foreign key constraints into a second migration pass so referenced tables can be created first.
-- Choose primary key strategy, `tinyint(1)` handling, zero-date handling, and an optional Laravel database connection name.
-- Block or ignore CRUD/data statements such as `SELECT`, `INSERT`, `UPDATE`, `DELETE`, and `REPLACE`.
+### Node CLI
 
-## Browser Usage
-
-Open `sql_to_laravel_schema_creator.html` in a browser.
-
-No build step is required. The page loads Tailwind CSS from the CDN and uses the local files in `assets/`.
-
-## Installation
-
-Use npm for the standalone Node CLI:
+Install the standalone CLI:
 
 ```bash
 npm install -g sql-laravel-schema-converter
-sql-laravel convert dump.sql generated.php --pk=laravel
 ```
 
-Use Composer for the Laravel Artisan command:
+Convert a SQL dump into a Laravel migration file:
+
+```bash
+sql-laravel convert dump.sql database/migrations --pk=laravel
+```
+
+Print generated PHP to stdout instead:
+
+```bash
+sql-laravel convert dump.sql --no-wrap
+```
+
+### Laravel Artisan
+
+Install the Laravel package:
 
 ```bash
 composer require cxuan1225/sql-laravel-schema-converter
+```
+
+Convert a SQL dump from inside a Laravel application:
+
+```bash
 php artisan schema:convert-sql dump.sql database/migrations --pk=laravel
 ```
 
-If the packages have not been published to npm or Packagist yet, install from GitHub instead:
+When the output path is a directory, the CLI and Artisan command create a Laravel-style migration filename automatically.
+
+## Example
+
+Input SQL:
+
+```sql
+CREATE TABLE `users` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `email` varchar(255) NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `users_email_unique` (`email`)
+);
+```
+
+Command:
+
+```bash
+sql-laravel convert users.sql --pk=laravel
+```
+
+Output excerpt:
+
+```php
+Schema::create('users', function (Blueprint $table) {
+    $table->id();
+    $table->string('email', 255);
+    $table->timestamps();
+
+    $table->unique('email', 'users_email_unique');
+});
+```
+
+## What It Converts
+
+- One or more MySQL/MariaDB `CREATE TABLE` blocks.
+- Columns, nullable/default modifiers, primary keys, unique keys, indexes, and foreign keys.
+- `created_at` and `updated_at` columns into `$table->timestamps()`.
+- `deleted_at` columns into `$table->softDeletes()`.
+- Optional `bigint unsigned` foreign key columns into `$table->foreignId()`.
+- Optional anonymous Laravel migration class wrappers.
+- Optional Laravel database connection names through `Schema::connection(...)`.
+
+The converter also detects warnings, SQL size, table names, foreign keys, and conversion status while editing in the browser UI.
+
+## Safety Checks
+
+By default, conversion is blocked when the input contains CRUD or data statements such as `SELECT`, `INSERT`, `UPDATE`, `DELETE`, or `REPLACE`. Use `--ignore-crud` when you want those statements skipped instead.
+
+Foreign key constraints are moved into a second migration pass so referenced tables can be created first.
+
+## Installation From GitHub
+
+If the packages have not been published to npm or Packagist yet, install directly from GitHub.
 
 ```bash
 npm install -g github:Cxuan1225/SQL-Laravel-Schema-Converter
@@ -51,6 +107,63 @@ composer require cxuan1225/sql-laravel-schema-converter:dev-master
 ```
 
 Composer uses `composer require` to download a package into a Laravel project. `composer install` is only for installing dependencies from an existing `composer.lock`.
+
+## Node CLI Reference
+
+Run the converter directly from the repository:
+
+```bash
+node bin/sql-laravel.js convert dump.sql generated.php --pk=laravel
+```
+
+Write to a migration directory:
+
+```bash
+node bin/sql-laravel.js convert dump.sql database/migrations --migration-name=create_imported_schema
+```
+
+Available CLI options:
+
+```text
+--wrap / --no-wrap
+--timestamps / --no-timestamps
+--soft-deletes / --no-soft-deletes
+--foreign-id
+--pk=legacy|laravel
+--tinyint=boolean|tinyInteger
+--zero-date=nullable|preserve
+--connection=<name>
+--ignore-crud
+--migration-name=<name>
+--json
+--quiet
+```
+
+## Laravel Artisan Reference
+
+The Composer package registers this command in Laravel applications:
+
+```bash
+php artisan schema:convert-sql {sql_path} {output_path?}
+```
+
+Examples:
+
+```bash
+php artisan schema:convert-sql dump.sql database/migrations --pk=laravel
+php artisan schema:convert-sql dump.sql database/migrations/2026_05_06_000000_imported_schema.php --foreign-id
+php artisan schema:convert-sql dump.sql --no-wrap --json
+```
+
+The Artisan command supports the same conversion options as the Node CLI.
+
+## Browser Usage
+
+Open `sql_to_laravel_schema_creator.html` in a browser.
+
+No build step is required. The page loads Tailwind CSS from the CDN and uses the local files in `assets/`.
+
+The browser app supports importing `.sql` or `.txt` files, pasting from the clipboard, copying output, and downloading the generated migration.
 
 ## API Usage
 
@@ -89,62 +202,7 @@ Example response shape:
 }
 ```
 
-## Node CLI Usage
-
-Run the converter directly with Node:
-
-```bash
-node bin/sql-laravel.js convert dump.sql generated.php --pk=laravel
-```
-
-Write to a migration directory:
-
-```bash
-node bin/sql-laravel.js convert dump.sql database/migrations --migration-name=create_imported_schema
-```
-
-Print generated PHP to stdout by omitting the output path:
-
-```bash
-node bin/sql-laravel.js convert dump.sql --no-wrap
-```
-
-Available CLI options:
-
-```text
---wrap / --no-wrap
---timestamps / --no-timestamps
---soft-deletes / --no-soft-deletes
---foreign-id
---pk=legacy|laravel
---tinyint=boolean|tinyInteger
---zero-date=nullable|preserve
---connection=<name>
---ignore-crud
---migration-name=<name>
---json
---quiet
-```
-
-## Laravel Artisan Usage
-
-This repository can also be used as a Laravel package. Registering the package exposes:
-
-```bash
-php artisan schema:convert-sql {sql_path} {output_path?}
-```
-
-Examples:
-
-```bash
-php artisan schema:convert-sql dump.sql database/migrations --pk=laravel
-php artisan schema:convert-sql dump.sql database/migrations/2026_05_06_000000_imported_schema.php --foreign-id
-php artisan schema:convert-sql dump.sql --no-wrap --json
-```
-
-The Artisan command supports the same conversion options as the Node CLI. When `output_path` is a directory, the command creates a Laravel-style migration filename using `--migration-name`.
-
-## Package Separation
+## Package Contents
 
 The repository keeps the browser app, Vercel API, Node CLI, and Laravel package together, but published package contents are separated:
 
@@ -153,9 +211,9 @@ The repository keeps the browser app, Vercel API, Node CLI, and Laravel package 
 - The Vercel API is deployed from the repository and shares the JavaScript converter core without depending on browser files.
 - Browser-only files such as `sql_to_laravel_schema_creator.html` and `assets/` are excluded from both CLI package archives.
 
-## Deploying
+## Deployment
 
-This repository is ready for static deployment on Vercel. The `vercel.json` file rewrites `/` to `sql_to_laravel_schema_creator.html`, so the converter is available at the site root after deployment.
+This repository is ready for static deployment on Vercel. The `vercel.json` file rewrites `/` to `sql_to_laravel_schema_creator.html`, so the browser converter is available at the site root after deployment.
 
 ## Project Structure
 
@@ -172,13 +230,18 @@ This repository is ready for static deployment on Vercel. The `vercel.json` file
 |   +-- Support/
 |   |   +-- SqlLaravelConverter.php
 |   +-- SqlLaravelSchemaConverterServiceProvider.php
-+-- sql_to_laravel_schema_creator.html
 +-- assets/
 |   +-- css/
 |   |   +-- styles.css
 |   +-- js/
 |       +-- app.js
 |       +-- tailwind-config.js
++-- tests/
+|   +-- converter.test.js
+|   +-- php_converter_test.php
+|   +-- fixtures/
+|       +-- sample.sql
++-- sql_to_laravel_schema_creator.html
 +-- composer.json
 +-- package.json
 +-- LICENSE
@@ -193,10 +256,22 @@ Run JavaScript syntax checks:
 npm test
 ```
 
+Run the JavaScript converter/API/CLI tests:
+
+```bash
+node --test tests/converter.test.js
+```
+
 Validate Composer metadata:
 
 ```bash
 composer validate --strict
+```
+
+Run the PHP converter smoke test:
+
+```bash
+php tests/php_converter_test.php
 ```
 
 ## Conversion Notes
